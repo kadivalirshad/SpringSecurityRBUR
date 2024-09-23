@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<!-- Created By CodingLab - www.codinglabweb.com -->
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <title>  Registration Form  </title>
+    <link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="/css/register.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+		     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+		     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   </head>
+<body>
+	<nav class="sticky">
+	  <div class="nav-content">
+	    <div class="logo">
+	      <a href="#">Role Base Authentication.</a>
+	    </div>
+	    <ul class="nav-links">
+	      <li><a th:href="@{/index}">Home</a></li>
+	      <li><a th:href="@{/register}">Register</a></li>
+	      <li><a th:href="@{/users}">Users</a></li>
+		  <li><a th:href="@{/userPermission}">Users and Permission</a></li>
+	      <li><a th:href="@{/logout}">Log Out</a></li>
+	    </ul>
+	  </div>
+	</nav>
+	<section >
+		<div class="container">
+		    <div class="title">Edit User Role and Permission</div>
+			<div th:if="${param.success}">
+			  <div class="alert alert-info" style="color:green;">You've successfully Created!</div>
+			</div>
+			<div th:if="${param.deleteSuccess}">
+						  <div class="alert alert-info" style="color:green;">You've successfully Deleted!</div>
+						</div>			
+			<div th:if="${param.error}">
+						  <div class="alert alert-info" style="color:red;">Oops! Something Went Wrong</div>
+						</div>
+		    <div class="content">
+		    <form  id="userForm" name="userForm"  method="post" th:action="@{/userPermission/save}" role="form" th:object="${rolesDto}">
+				<input type="hidden" th:if="${rolesDto.role_id !=null}" th:value="${rolesDto.role_id}" name="role_id">
+				  <div class="input-box form-group">
+				  <span class="details">Role Name</span>
+		          <input type="text" name="name" class="form-control" id="rolename" th:field="*{name}" onchange="checkRollName()"/>
+				</div> 
+				
+				<div class="input-box p-2 form-group">
+				  <span class="details">Select Permission</span>
+				  <input  type="checkbox" id="CREATE" class="role form-check-input" name="permission_name" value="CREATE" > CREATE
+				  <input  type="checkbox" id="UPDATE" class="role form-check-input"  name="permission_name" value="UPDATE" > UPDATE
+				  <input  type="checkbox" id="DELETE" class="role form-check-input" name="permission_name" value="DELETE" > DELETE
+				  <input  type="checkbox" id="VIEW" class="role form-check-input" name="permission_name" value="VIEW" > VIEW
+				  
+				</div>  
+						        
+		       
+		        <div class="button">
+		          <button type="button" class="btn btn-primary" onclick="submitForm();" >Submit</button>
+		        </div>
+		      </form>
+			  
+			  </div>
+		    </div>
+		 
+	</section>		
+  
+
+</body>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+	crossorigin="anonymous"></script>
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+	     	var roleList= /*[[${rolesDto.permission}]]*/ "Test1";
+	/*]]>*/
+	</script>
+	<script>
+	 $(document).ready(function (){
+		if(roleList!=null){
+		roleList.forEach((element) => {
+			if(element.name=="CREATE")
+				$("#CREATE").attr("checked", "checked");
+			else if(element.name=="UPDATE")
+				$("#UPDATE").attr("checked", "checked");
+			else if(element.name=="DELETE")
+				$("#DELETE").attr("checked", "checked");		
+			else if(element.name=="VIEW")
+				 $("#VIEW").attr("checked", "checked");
+		});
+	}	
+		if(roleList==null){
+			$("#VIEW").attr("checked", "checked");
+		}
+	 });
+	
+		   s
+		   function submitForm() {
+		   		let flag = formValidation();
+		   		if (flag && confirm("Are you Sure ?")) {
+		   			document.userForm.target = "_self";
+		   			document.userForm.submit();
+		   		}
+		   	}
+
+			function formValidation() {
+					   		let flag = true;
+
+					   		var data = document.querySelectorAll('input:not([type=hidden])');
+							let countchecks=0;
+					   		for (let i = 0; i < data.length; i++) {
+					   			let valueById = $("#" + data[i].id).val();
+								
+								
+								if (data[i].type === 'checkbox' && countchecks==0) {
+								           if (!data[i].checked) {
+								               $("#" + data[i].id).css("border", "1px solid red");
+								               flag = false;
+											   $("#checkBoxValidateId").show();
+								           }
+										   else{
+											countchecks++;
+											flag = true;
+											 $("#checkBoxValidateId").hide();
+										   }
+								} 
+							     else {
+								          if (valueById == null || valueById === "") {
+								               $("#" + data[i].id).css("border", "1px solid red");
+								               flag = false;
+								           }
+								       }
+					   		}
+
+					   		return flag;
+					   	} 
+			
+			function hideError1(e) {
+				document.getElementById(e.id).style.border = "";
+			}
+			
+			function checkRollName() {
+									var formdata=$("#userForm").serialize();
+								    $.ajax({
+								        url: '/checkRoleName',
+								        type: "POST",
+									    data: formdata ,
+										contentType: 'application/x-www-form-urlencoded',
+								        success: function(result) {
+								            if (result) {
+								                $("#rolenameid").show();
+												$("#rolename").val("");
+								            } else{
+												$("#rolenameid").hide();
+											}
+								        },
+								        error: function(xhr, status, error) {
+								            console.error('AJAX Error:', status, error);
+								        }
+								    });
+								}
+			
+
+</script>
+</html>

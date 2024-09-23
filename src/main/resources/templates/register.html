@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<!-- Created By CodingLab - www.codinglabweb.com -->
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <title>  Registration Form  </title>
+    <link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="/css/register.css">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   </head>
+<body>
+	<nav class="sticky">
+	  <div class="nav-content">
+	    <div class="logo">
+	      <a href="#">Role Base Authentication.</a>
+	    </div>
+	    <ul class="nav-links">
+	      <li><a th:href="@{/index}">Home</a></li>
+	      <li><a th:href="@{/register}">Register</a></li>
+	      <li><a th:href="@{/users}">Users</a></li>
+		  <li><a th:href="@{/userPermission}">Users and Permission</a></li>
+	      <li><a th:href="@{/logout}">Log Out</a></li>
+	    </ul>
+	  </div>
+	</nav>
+	<section >
+		<div class="container">
+		    <div class="title">Registration</div>
+			<div th:if="${param.success}">
+			  <div class="alert alert-info" style="color:green;">You've successfully registered!</div>
+			</div>
+			<div th:if="${param.error}">
+						  <div class="alert alert-info" style="color:red;">Oops! Something Went Wrong</div>
+						</div>
+		    <div class="content">
+		    <form  id="userForm" name="userForm"  method="post" th:action="@{/register/save}" role="form" th:object="${user}">
+				<div id="rolesData" data-roles-th="${user.roles}" hidden></div>
+				<input type="hidden" th:if="${user.user_id !=null}" th:value="${user.user_id}" name="user_id">
+		        <div class="user-details">
+		          <div class="input-box">
+		            <span class="details">Full Name</span>
+		            <input type="text" id="name" placeholder="Enter your name" class="alphabetonly" name="name" th:field="*{name}">
+					<p th:errors="*{name}" class="text-danger" th:if="${#fields.hasErrors('name')}">
+		          </div>
+		          <div class="input-box">
+		            <span class="details">Username</span>
+		            <input type="text" id="username" placeholder="Enter your username" name="username" th:field="*{username}" onchange="checkUserName(this.value)">
+					<span style="color:red; display:none;" id="userNameExist">UserName Already Exist</span>
+					<p th:errors="*{username}" class="text-danger" th:if="${#fields.hasErrors('username')}">
+		          </div>
+		          <div class="input-box">
+		            <span class="details">Email</span>
+		            <input type="text" id="email" placeholder="Enter your email" name="email" th:field="*{email}">
+					<p th:errors="*{email}" class="text-danger" th:if="${#fields.hasErrors('email')}">
+		          </div>
+		          <div class="input-box">
+		            <span class="details">Phone Number</span>
+		            <input type="text" id="mobile" class="numberonly" placeholder="Enter your number" name="mobile" th:field="*{mobile}">
+					<p th:errors="*{mobile}" class="text-danger" th:if="${#fields.hasErrors('mobile')}">
+		          </div>
+		          <div class="input-box">
+		            <span class="details">Password</span>
+		            <input type="password" id="password" placeholder="Enter your password"  name="password" th:value="${user.plain_pass}">
+					<p th:errors="*{password}" class="text-danger" th:if="${#fields.hasErrors('password')}">
+		          </div>
+		          <div class="input-box">
+		            <span class="details">Confirm Password</span>
+		            <input type="password" id="confirmPassword" placeholder="Confirm your password" onchange="passwordVerfiy(this.value)" th:value="${user.plain_pass}" required>
+					<span style="color:red;display:none;" id="cPass">Passwords do not match</span>
+		          </div>
+				  
+				  <div>
+					<span class="details">Select Role</span>
+				 <div style="display:flex;flex-wrap:wrap;">	
+				  <p th:each="role: ${allrole}">
+				    <input  type="checkbox" th:id="${role}" class="role" name="role_name" th:value="${role}">
+					 <span class="gender" th:text="${role}"></span>
+				  </p>
+				 </div> 
+				 </div>
+				 
+				  
+		        </div>
+		        <div class="gender-details">
+		          <input type="radio" name="gender" id="dot-1" value="M" th:field="*{gender}">
+		          <input type="radio" name="gender" id="dot-2" value="F" th:field="*{gender}">
+		          <input type="radio" name="gender" id="dot-3" value="P" th:field="*{gender}">
+		          <span class="gender-title">Gender</span>
+				 
+		          <div class="category">
+		            <label for="dot-1">
+		            <span class="dot one"></span>
+		            <span class="gender">Male</span>
+		          </label>
+		          <label for="dot-2">
+		            <span class="dot two"></span>
+		            <span class="gender">Female</span>
+		          </label>
+		          <label for="dot-3">
+		            <span class="dot three"></span>
+		            <span class="gender">Prefer not to say</span>
+		            </label>
+		          </div>
+		        </div>
+		        <div class="button">
+		          <button type="button" class="btn btn-primary" onclick="submitForm();" >Register</button>
+		        </div>
+		      </form>
+		    </div>
+		  </div>
+	</section>		
+  
+
+</body>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+	crossorigin="anonymous"></script>
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+	     	var roleList= /*[[${allrole}]]*/ "Test1";
+			var selectedRoles=/*[[${roles}]]*/ "Test2";
+	/*]]>*/
+	</script>
+	<script>
+	 $(document).ready(function (){
+		if(selectedRoles!=null){
+		selectedRoles.forEach((element) => {
+			roleList.forEach((element1)=>{
+				
+				if(element==element1)
+				  $("#"+element1).attr("checked", "checked");
+							
+				
+			});
+			
+		});
+	}	
+		if(selectedRoles==null){
+			$("#USER").attr("checked", "checked");
+		}
+	 });
+	  function passwordVerfiy(e){
+		  if($("#password") !=""){
+		  if($("#password").val() !==e)
+		  {
+			 $("#cPass").show(); 
+		  }
+		  else{
+			$("#cPass").hide(); 
+		  }
+		 } 
+	  }
+	 
+	  $('.numberonly').on('keypress', function(e) {
+	  	       const charCode = e.which || e.keyCode;
+	  	       const char = String.fromCharCode(charCode);
+	  	       if (/^\d$/.test(char) || e.ctrlKey || e.metaKey || e.altKey) {
+	  	           return true; 
+	  	       }
+	  	       e.preventDefault();
+	  	   });
+		   
+		   
+		   function submitForm() {
+		   		let flag = formValidation();
+		   		if (flag && confirm("Are you Sure ?")) {
+		   			document.userForm.target = "_self";
+		   			document.userForm.submit();
+		   		}
+		   	}
+
+		   	function formValidation() {
+		   		let flag = true;
+
+		   		var data = document.querySelectorAll('input:not([type=hidden])');
+		   		for (let i = 0; i < data.length; i++) {
+		   			let valueById = $("#" + data[i].id).val();
+		   			if (valueById == null || valueById == "" ) {
+		   				$("#" + data[i].id).css("border", "1px solid red");
+		   				flag = false;
+		   			}
+		   		}
+
+		   		return flag;
+		   	}  
+			
+			function hideError1(e) {
+				document.getElementById(e.id).style.border = "";
+			}
+
+			
+			function checkUserName(userName) {
+				var formdata=$("#userForm").serialize();
+			    $.ajax({
+			        url: '/checkUserName',
+			        type: "POST",
+				    data: formdata ,
+					contentType: 'application/x-www-form-urlencoded',
+			        success: function(result) {
+			            if (result) {
+			                $("#userNameExist").show();
+							$("#username").val("");
+			            } else{
+							$("#userNameExist").hide();
+						}
+			        },
+			        error: function(xhr, status, error) {
+			            console.error('AJAX Error:', status, error);
+			        }
+			    });
+			}
+
+
+			
+			$('.alphabetonly').on('keypress', function(e) {
+			        const charCode = e.which || e.keyCode;
+			        const char = String.fromCharCode(charCode);
+			        if (/^[a-zA-Z ]$/.test(char) || e.ctrlKey || e.metaKey || e.altKey) {
+			            return true; 
+			        }
+			        e.preventDefault();
+			    });
+	  
+</script>
+</html>
