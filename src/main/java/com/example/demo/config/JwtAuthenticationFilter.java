@@ -17,56 +17,52 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter{
-     
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
 	@Autowired
-	 private JwtTokenProvider jwtTokenProvider;
-        
-        @Autowired
-	    private UserDetailsService userDetailsService;
+	private JwtTokenProvider jwtTokenProvider;
 
-	    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
-	        this.jwtTokenProvider = jwtTokenProvider;
-	        this.userDetailsService = userDetailsService;
-	    }
+	@Autowired
+	private UserDetailsService userDetailsService;
 
-	    @Override
-	    protected void doFilterInternal(HttpServletRequest request,
-	                                    HttpServletResponse response,
-	                                    FilterChain filterChain) throws ServletException, IOException {
+	public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
+		this.jwtTokenProvider = jwtTokenProvider;
+		this.userDetailsService = userDetailsService;
+	}
 
-	        // Get JWT token from HTTP request
-	        String token = getTokenFromRequest(request);
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
 
-	        // Validate Token
-	        if(StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)){
-	            // get username from token
-	            String username = jwtTokenProvider.getUsername(token);
+		// Get JWT token from HTTP request
+		String token = getTokenFromRequest(request);
 
-	            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		// Validate Token
+		if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
+			// get username from token
+			String username = jwtTokenProvider.getUsername(token);
 
-	            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-	              userDetails,
-	              null,
-	              userDetails.getAuthorities()
-	            );
+			UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-	            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+					userDetails, null, userDetails.getAuthorities());
 
-	            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-	        }
+			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-	        filterChain.doFilter(request, response);
-	    }
+			SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+		}
 
-	    private String getTokenFromRequest(HttpServletRequest request){
-	        String bearerToken = request.getHeader("Authorization");
+		filterChain.doFilter(request, response);
+	}
 
-	        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
-	            return bearerToken.substring(7, bearerToken.length());
-	        }
+	private String getTokenFromRequest(HttpServletRequest request) {
+		String bearerToken = request.getHeader("Authorization");
 
-	        return null;
-	    }
+		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+			return bearerToken.substring(7, bearerToken.length());
+		}
+
+		return null;
+	}
 
 }

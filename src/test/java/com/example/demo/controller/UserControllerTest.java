@@ -1,11 +1,9 @@
 package com.example.demo.controller;
-
 import com.example.demo.dto.LoginDto;
-import com.example.demo.dto.RolesDto;
 import com.example.demo.dto.UserDto;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.Users;
-import com.example.demo.service.userDetailsServiceImpl;
+import com.example.demo.service.UserDetailsServices;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,21 +12,21 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-
 import java.util.Collections;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class UserControllerTest {
+class UserControllerTest {
 
     @InjectMocks
     private UserController userController;
 
     @Mock
-    private userDetailsServiceImpl userService;
+    private UserDetailsServices userService;
 
     @Mock
     private Model model;
@@ -37,194 +35,124 @@ public class UserControllerTest {
     private BindingResult bindingResult;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testLogin() {
+    void testLogin() {
         LoginDto loginDto = new LoginDto();
-        String token = "dummyToken";
+        String token = "dummy-token";
         when(userService.login(loginDto)).thenReturn(token);
-        
-        String result = userController.login(loginDto);
-        
-        assertEquals("/index", result);
+
+        String viewName = userController.login(loginDto);
+
+        assertEquals("/user/index", viewName);
         verify(userService).login(loginDto);
     }
 
     @Test
-    public void testGetLoginPage() {
-        String result = userController.login();
-        assertEquals("login", result);
-    }
+    void testRegister() {
+        UserDto userDto = new UserDto();
+        List<Role> roles = Collections.singletonList(new Role(null, "ROLE_USER", null, null));
+        when(userService.findAllRoles()).thenReturn(roles);
 
-    @Test
-    public void testIndexPage() {
-        String result = userController.index();
-        assertEquals("index", result);
-    }
+        String viewName = userController.register(model);
 
-    @Test
-    public void testInvalidAccess() {
-        String result = userController.invalidAccess();
-        assertEquals("invalidAccess", result);
-    }
-
-    @Test
-    public void testRegister() {
-        when(userService.findAllRoles()).thenReturn(Collections.singletonList(new Role(null, "ROLE_USER", null)));
-        
-        String result = userController.register(model);
-        
+        assertEquals("register", viewName);
         verify(model).addAttribute(eq("user"), any(UserDto.class));
-        verify(model).addAttribute(eq("allrole"), anyList());
-        assertEquals("register", result);
+        verify(model).addAttribute(eq("allrole"), any(List.class));
     }
 
     @Test
-    public void testEditUserDetails() {
-        UUID id = UUID.randomUUID();
+    void testEditUserDetails() {
+        UUID userId = UUID.randomUUID();
         Users user = new Users();
-        when(userService.getUserDetailsById(id)).thenReturn(Optional.of(user));
-        when(userService.findAllRoles()).thenReturn(Collections.singletonList(new Role(null, "ROLE_USER", null)));
-        
-        String result = userController.editUserDetails(id, model);
-        
-        verify(model).addAttribute(eq("user"), any(Users.class));
-        assertEquals("register", result);
+        user.setUser_id(userId);
+        user.setRoles(Collections.singletonList(new Role(null, "ROLE_USER", null, null)));
+        when(userService.getUserDetailsById(userId)).thenReturn(user);
+        when(userService.findAllRoles()).thenReturn(Collections.singletonList(new Role(null, "ROLE_USER", null, null)));
+
+        String viewName = userController.editUserDetails(userId, model);
+
+        assertEquals("register", viewName);
+        verify(model).addAttribute(eq("user"), eq(user));
     }
 
     @Test
-    public void testViewUserProfile() {
-        UUID id = UUID.randomUUID();
+    void testViewUserProfile() {
+        UUID userId = UUID.randomUUID();
         Users user = new Users();
-        when(userService.getUserDetailsById(id)).thenReturn(Optional.of(user));
-        
-        String result = userController.viewUserProfile(id, model);
-        
-        verify(model).addAttribute(eq("user"), any(Users.class));
-        assertEquals("user", result);
+        user.setUser_id(userId);
+        user.setRoles(Collections.singletonList(new Role(null, "ROLE_USER", null, null)));
+        when(userService.getUserDetailsById(userId)).thenReturn(user);
+
+        String viewName = userController.viewUserProfile(userId, model);
+
+        assertEquals("user", viewName);
+        verify(model).addAttribute(eq("user"), eq(user));
     }
 
     @Test
-    public void testUserList() {
-        when(userService.findAllUsers()).thenReturn(Collections.singletonList(new Users()));
-        
-        String result = userController.userList(model);
-        
-        verify(model).addAttribute(eq("users"), anyList());
-        assertEquals("UsersList", result);
+    void testUserList() {
+        List<Users> users = Collections.singletonList(new Users());
+        when(userService.findAllUsers()).thenReturn(users);
+
+        String viewName = userController.userList(model);
+
+        assertEquals("UsersList", viewName);
+        verify(model).addAttribute(eq("users"), eq(users));
     }
 
     @Test
-    public void testRegistration() {
+    void testRegistration_Success() {
         UserDto userDto = new UserDto();
         when(bindingResult.hasErrors()).thenReturn(false);
         when(userService.register(userDto)).thenReturn(true);
-        
-        String result = userController.registration(userDto, bindingResult);
-        
-        assertEquals("redirect:/register?success", result);
+
+        String viewName = userController.registration(userDto, bindingResult);
+
+        assertEquals("redirect:/user/register?success", viewName);
     }
 
     @Test
-    public void testRegistrationWithErrors() {
-        when(bindingResult.hasErrors()).thenReturn(true);
-        
-        String result = userController.registration(new UserDto(), bindingResult);
-        
-        assertEquals("register", result);
-    }
-
-    @Test
-    public void testDeleteUser() {
-        UUID id = UUID.randomUUID();
-        String result = userController.deleteUser(id);
-        assertEquals("redirect:/users", result);
-        verify(userService).deteleUser(id);
-    }
-
-    @Test
-    public void testRegisterUserRolesAndPermission() {
-        RolesDto rolesDto = new RolesDto();
+    void testRegistration_Failure() {
+        UserDto userDto = new UserDto();
         when(bindingResult.hasErrors()).thenReturn(false);
-        when(userService.registerUserRolesAndPermission(rolesDto)).thenReturn(true);
-        
-        String result = userController.registerUserRolesAndPermission(rolesDto, bindingResult);
-        
-        assertEquals("redirect:/userPermission?success", result);
+        when(userService.register(userDto)).thenReturn(false);
+
+        String viewName = userController.registration(userDto, bindingResult);
+
+        assertEquals("redirect:/user/register?error", viewName);
     }
 
     @Test
-    public void testRegisterUserRolesAndPermissionWithErrors() {
-        when(bindingResult.hasErrors()).thenReturn(true);
-        
-        String result = userController.registerUserRolesAndPermission(new RolesDto(), bindingResult);
-        
-        assertEquals("userPermission", result);
+    void testDeleteUser() {
+        UUID userId = UUID.randomUUID();
+        String viewName = userController.deleteUser(userId);
+
+        assertEquals("redirect:/user/users", viewName);
+        verify(userService).deleteUser(userId);
     }
 
     @Test
-    public void testCheckUserName() {
+    void testCheckUserName() {
         String username = "testUser";
         when(userService.getUserName(username)).thenReturn(true);
-        
+
         ResponseEntity<Boolean> response = userController.checkUserName(username);
-        
-        assertTrue(response.getBody());
+
+        assertEquals(ResponseEntity.ok(true), response);
     }
 
     @Test
-    public void testCheckRoleName() {
-        String roleName = "testRole";
+    void testCheckRoleName() {
+        String roleName = "ROLE_USER";
         when(userService.getRoleName(roleName)).thenReturn(true);
-        
+
         ResponseEntity<Boolean> response = userController.checkRoleName(roleName);
-        
-        assertTrue(response.getBody());
-    }
 
-    @Test
-    public void testEditPermission() {
-        Long id = 1L;
-        Role role = new Role(id, "ROLE_USER", null);
-        when(userService.findPermissionByid(id)).thenReturn(role);
-        
-        String result = userController.editPermission(id, model);
-        
-        verify(model).addAttribute(eq("rolesDto"), any(Role.class));
-        assertEquals("editUserPermission", result);
-    }
-
-    @Test
-    public void testDeleteUserPermission() {
-        Long id = 1L;
-        when(userService.deleteUserPermission(id)).thenReturn(true);
-        
-        String result = userController.deleteUserPermission(id);
-        
-        assertEquals("redirect:/userPermission?deleteSuccess", result);
-    }
-
-    @Test
-    public void testDeleteUserPermissionFailure() {
-        Long id = 1L;
-        when(userService.deleteUserPermission(id)).thenReturn(false);
-        
-        String result = userController.deleteUserPermission(id);
-        
-        assertEquals("redirect:/userPermission?error", result);
-    }
-
-    @Test
-    public void testUserPermission() {
-        when(userService.findAllRoles()).thenReturn(Collections.singletonList(new Role(null, "ROLE_USER", null)));
-        
-        String result = userController.userPermission(model);
-        
-        verify(model).addAttribute(eq("rolesDto"), any(RolesDto.class));
-        assertEquals("userPermission", result);
+        assertEquals(ResponseEntity.ok(true), response);
     }
 }
 

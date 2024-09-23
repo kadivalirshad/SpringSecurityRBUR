@@ -20,65 +20,55 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SpringSecurityConfig {
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+	@Autowired
+	private UserDetailsService userDetailsService;
 
-    @Autowired
-    private JwtAuthenticationEntryPoint authenticationEntryPoint;
+	@Autowired
+	private JwtAuthenticationEntryPoint authenticationEntryPoint;
 
-    @Autowired
-    private JwtAuthenticationFilter authenticationFilter;
+	@Autowired
+	private JwtAuthenticationFilter authenticationFilter;
 
-    @Bean
-    public static PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	public static PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/checkUserName","/login").permitAll()
-                .requestMatchers("/users/**", "/view/**").hasAnyAuthority("VIEW")
-                .requestMatchers("/users/**","/edit/**").hasAnyAuthority("UPDATE")
-                .requestMatchers("/delete/**").hasAnyAuthority("DELETE")
-                .requestMatchers("/register/**","/userPermission/**").hasAnyAuthority("CREATE")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/index", true) // Redirect to home on successful login
-                .failureUrl("/login?error=true") 
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                .permitAll()
-            )
-            .exceptionHandling(eh -> eh
-                .accessDeniedPage("/403")
-                .authenticationEntryPoint(authenticationEntryPoint)  // Set custom entry point
-            );
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.authorizeHttpRequests(auth -> auth.requestMatchers("/user/checkUserName", "/user/login").permitAll()
+				.requestMatchers("/user/users/**", "/user/view/**").hasAnyAuthority("VIEW")
+				.requestMatchers("/user/users/**", "/user/edit/**").hasAnyAuthority("UPDATE")
+				.requestMatchers("/user/delete/**").hasAnyAuthority("DELETE")
+				.requestMatchers("/user/register/**", "/Admin/userPermission/**").hasAnyAuthority("CREATE").anyRequest()
+				.authenticated())
+				.formLogin(form -> form.loginPage("/user/login").loginProcessingUrl("/user/login")
+						.defaultSuccessUrl("/user/index", true) // Redirect to home on successful login
+						.failureUrl("/user/login?error=true").permitAll())
+				.logout(logout -> logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout")).permitAll())
+				.exceptionHandling(
+						eh -> eh.accessDeniedPage("/user/403").authenticationEntryPoint(authenticationEntryPoint) // Set
+																													// custom
+																													// entry
+																													// point
+				);
 
-        http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
+		http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+		return http.build();
+	}
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+		return configuration.getAuthenticationManager();
+	}
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/images/**", "/js/**", "/css/**", "/webjars/**");
-    }
+	@Bean
+	public WebSecurityCustomizer webSecurityCustomizer() {
+		return (web) -> web.ignoring().requestMatchers("/images/**", "/js/**", "/css/**", "/webjars/**");
+	}
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-            .userDetailsService(userDetailsService)
-            .passwordEncoder(passwordEncoder());
-    }
+	@Autowired
+	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+		auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+	}
 }

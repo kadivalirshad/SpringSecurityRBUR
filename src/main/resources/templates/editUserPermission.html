@@ -18,10 +18,10 @@
 	      <a href="#">Role Base Authentication.</a>
 	    </div>
 	    <ul class="nav-links">
-	      <li><a th:href="@{/index}">Home</a></li>
-	      <li><a th:href="@{/register}">Register</a></li>
-	      <li><a th:href="@{/users}">Users</a></li>
-		  <li><a th:href="@{/userPermission}">Users and Permission</a></li>
+	      <li><a th:href="@{/user/index}">Home</a></li>
+	      <li><a th:href="@{/user/register}">Register</a></li>
+	      <li><a th:href="@{/user/users}">Users</a></li>
+		  <li><a th:href="@{/Admin/userPermission}">Users and Permission</a></li>
 	      <li><a th:href="@{/logout}">Log Out</a></li>
 	    </ul>
 	  </div>
@@ -39,7 +39,7 @@
 						  <div class="alert alert-info" style="color:red;">Oops! Something Went Wrong</div>
 						</div>
 		    <div class="content">
-		    <form  id="userForm" name="userForm"  method="post" th:action="@{/userPermission/save}" role="form" th:object="${rolesDto}">
+		    <form  id="userForm" name="userForm"  method="post" th:action="@{/Admin/userPermission/save}" role="form" th:object="${rolesDto}">
 				<input type="hidden" th:if="${rolesDto.role_id !=null}" th:value="${rolesDto.role_id}" name="role_id">
 				  <div class="input-box form-group">
 				  <span class="details">Role Name</span>
@@ -142,7 +142,7 @@
 			function checkRollName() {
 									var formdata=$("#userForm").serialize();
 								    $.ajax({
-								        url: '/checkRoleName',
+								        url: '/user/checkRoleName',
 								        type: "POST",
 									    data: formdata ,
 										contentType: 'application/x-www-form-urlencoded',

@@ -190,7 +190,7 @@
 	<div class="screen">
 		<div class="screen__content">
 			
-			<form method="post" th:action="@{/login}" class="login" role="form"  th:object="${login}">
+			<form method="post" th:action="@{/user/login}" class="login" role="form"  th:object="${login}">
 				<div th:if="${param.error}" style="color:red;font-weight:bold;">Invalid username or password </div>
 				<div class="login__field">
 					<i class="login__icon fas fa-user"></i>

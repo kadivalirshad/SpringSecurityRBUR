@@ -1,4 +1,5 @@
 package com.example.demo.config;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -18,59 +19,42 @@ import java.util.Map;
 
 @Component
 public class JwtTokenProvider {
-  
-	
-	    private String jwtSecret="daf66e01593f61a15b857cf433aae03a005812b31234e149036bcc8dee755dbb";
 
-	   
-	    private long jwtExpirationDate=604800000;
+	@Value("${jwtkey}")
+	private String jwtSecret;
 
-	    // generate JWT token
-	    public String generateToken(Authentication authentication,Users user){
-	    	 Map<String, Object> claims = new HashMap<>();
-	        String username = authentication.getName();
+	private long jwtExpirationDate = 604800000;
 
-	        Date currentDate = new Date();
+	// generate JWT token
+	public String generateToken(Authentication authentication, Users user) {
+		Map<String, Object> claims = new HashMap<>();
+		String username = authentication.getName();
 
-	        Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
+		Date currentDate = new Date();
 
-	        String token = Jwts.builder()
-	        		.claims()
-	        		.add(claims)
-	                .subject(username)
-	                .issuedAt(new Date())
-	                .expiration(expireDate)
-	                .and()
-	                .signWith(key())
-	                .compact();
+		Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
 
-	        return token;
-	    }
+		String token = Jwts.builder().claims().add(claims).subject(username).issuedAt(new Date()).expiration(expireDate)
+				.and().signWith(key()).compact();
 
-	    private Key key(){
-	        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
-	    }
+		return token;
+	}
 
-	    // get username from JWT token
-	    public String getUsername(String token){
+	private Key key() {
+		return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+	}
 
-	        return Jwts.parser()
-	                .verifyWith((SecretKey) key())
-	                .build()
-	                .parseSignedClaims(token)
-	                .getPayload()
-	                .getSubject();
-	    }
+	// get username from JWT token
+	public String getUsername(String token) {
 
-	    // validate JWT token
-	    public boolean validateToken(String token){
-	            Jwts.parser()
-	                    .verifyWith((SecretKey) key())
-	                    .build()
-	                    .parse(token);
-	            return true;
+		return Jwts.parser().verifyWith((SecretKey) key()).build().parseSignedClaims(token).getPayload().getSubject();
+	}
 
-	    }
-	    
-	
+	// validate JWT token
+	public boolean validateToken(String token) {
+		Jwts.parser().verifyWith((SecretKey) key()).build().parse(token);
+		return true;
+
+	}
+
 }
