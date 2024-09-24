@@ -44,6 +44,8 @@
 				  <div class="input-box form-group">
 				  <span class="details">Role Name</span>
 		          <input type="text" name="name" class="form-control" id="rolename" th:field="*{name}" onchange="checkRollName()"/>
+				  <input type="hidden" id="roleNameHidden" th:value="${rolesDto.name}">
+				  <span style="color:red;display:none;" id="rolenameid">Role Name Already Exist</span>
 				</div> 
 				
 				<div class="input-box p-2 form-group">
@@ -94,7 +96,7 @@
 		}
 	 });
 	
-		   s
+		   
 		   function submitForm() {
 		   		let flag = formValidation();
 		   		if (flag && confirm("Are you Sure ?")) {
@@ -105,7 +107,8 @@
 
 			function formValidation() {
 					   		let flag = true;
-
+                            let inputValidate=true;
+							let checkboxValidate=true;
 					   		var data = document.querySelectorAll('input:not([type=hidden])');
 							let countchecks=0;
 					   		for (let i = 0; i < data.length; i++) {
@@ -115,24 +118,26 @@
 								if (data[i].type === 'checkbox' && countchecks==0) {
 								           if (!data[i].checked) {
 								               $("#" + data[i].id).css("border", "1px solid red");
-								               flag = false;
+								               checkboxValidate = false;
 											   $("#checkBoxValidateId").show();
 								           }
 										   else{
 											countchecks++;
-											flag = true;
+											checkboxValidate = true;
 											 $("#checkBoxValidateId").hide();
 										   }
 								} 
-							     else {
+							     if(data[i].type === 'text' || data[i].type === 'password' || data[i].type === 'email') {
 								          if (valueById == null || valueById === "") {
 								               $("#" + data[i].id).css("border", "1px solid red");
-								               flag = false;
+								               inputValidate = false;
 								           }
 								       }
 					   		}
-
-					   		return flag;
+                           if(inputValidate && checkboxValidate)
+					   		return flag=true;
+							else
+							 return flag=false;
 					   	} 
 			
 			function hideError1(e) {
@@ -148,8 +153,11 @@
 										contentType: 'application/x-www-form-urlencoded',
 								        success: function(result) {
 								            if (result) {
-								                $("#rolenameid").show();
-												$("#rolename").val("");
+												if($("#rolename").val() != $("#roleNameHidden").val())
+								                { 
+													$("#rolenameid").show();
+												    $("#rolename").val(""); 
+											    }
 								            } else{
 												$("#rolenameid").hide();
 											}
