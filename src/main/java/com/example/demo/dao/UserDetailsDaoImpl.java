@@ -88,7 +88,7 @@ public class UserDetailsDaoImpl implements UserDetailsDoa {
 		var Username = authentication.getName();
 //		List<String> rollList = Arrays.asList(userRoles.toString());
 
-		return userRoles.contains("ROLE_USER") && !userRoles.contains("ROLE_ADMIN")
+		return  !userRoles.contains("ROLE_ADMIN")
 				? userRepo.findByMutipleUser(Username).stream().toList()
 				: userRepo.findAll();
 	}

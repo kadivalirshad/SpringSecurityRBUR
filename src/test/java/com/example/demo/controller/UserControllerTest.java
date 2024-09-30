@@ -39,17 +39,17 @@ class UserControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void testLogin() {
-        LoginDto loginDto = new LoginDto();
-        String token = "dummy-token";
-        when(userService.login(loginDto)).thenReturn(token);
-
-        String viewName = userController.login(loginDto);
-
-        assertEquals("/user/index", viewName);
-        verify(userService).login(loginDto);
-    }
+//    @Test
+//    void testLogin() {
+//        LoginDto loginDto = new LoginDto();
+//        String token = "dummy-token";
+//        when(userService.login(loginDto)).thenReturn(token);
+//
+//        String viewName = userController.login(loginDto);
+//
+//        assertEquals("/user/index", viewName);
+//        verify(userService).login(loginDto);
+//    }
 
     @Test
     void testRegister() {

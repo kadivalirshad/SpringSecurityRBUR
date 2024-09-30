@@ -37,7 +37,7 @@ public class Role {
 	private String name;
 	@Transient
 	private String permission_name[];
-	@ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+	@ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.EAGER)
 	@JoinTable(name = "roles_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
 	private List<Permissions> permission = new ArrayList<>();
 

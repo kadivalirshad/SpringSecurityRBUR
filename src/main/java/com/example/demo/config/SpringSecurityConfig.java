@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import com.example.demo.Exception.GlobalExceptionHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -29,6 +31,12 @@ public class SpringSecurityConfig {
 	@Autowired
 	private JwtAuthenticationFilter authenticationFilter;
 
+	@Autowired
+	private OAuthSuccessHandler authSuccessHandler;
+	  
+	@Autowired
+	private GlobalExceptionHandler globalException;
+	
 	@Bean
 	public static PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -36,21 +44,24 @@ public class SpringSecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests(auth -> auth.requestMatchers("/user/checkUserName", "/user/login").permitAll()
+		http.authorizeHttpRequests(auth -> auth.requestMatchers("/user/checkUserName", "/user/login","user/checkUserLogin").permitAll()
 				.requestMatchers("/user/users/**", "/user/view/**").hasAnyAuthority("VIEW")
-				.requestMatchers("/user/users/**", "/user/edit/**").hasAnyAuthority("UPDATE")
+				.requestMatchers("/user/users/**", "/user/edit/**","/user/register/update/**").hasAnyAuthority("UPDATE")
 				.requestMatchers("/user/delete/**").hasAnyAuthority("DELETE")
 				.requestMatchers("/user/register/**", "/Admin/userPermission/**").hasAnyAuthority("CREATE").anyRequest()
 				.authenticated())
-				.formLogin(form -> form.loginPage("/user/login").loginProcessingUrl("/user/login")
-						.defaultSuccessUrl("/user/index", true) // Redirect to home on successful login
+		        .formLogin(form -> form.loginPage("/user/login")
 						.failureUrl("/user/login?error=true").permitAll())
+		        
+				.oauth2Login(oauth2 -> {
+					oauth2.loginPage("/user/login");
+					oauth2.successHandler(authSuccessHandler);
+					oauth2.failureHandler(globalException);
+				})
+				
 				.logout(logout -> logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout")).permitAll())
 				.exceptionHandling(
-						eh -> eh.accessDeniedPage("/user/403").authenticationEntryPoint(authenticationEntryPoint) // Set
-																													// custom
-																													// entry
-																													// point
+						eh -> eh.accessDeniedPage("/user/403").authenticationEntryPoint(authenticationEntryPoint) 
 				);
 
 		http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -71,4 +82,5 @@ public class SpringSecurityConfig {
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 	}
+	
 }

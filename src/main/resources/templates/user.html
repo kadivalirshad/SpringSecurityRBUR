@@ -69,12 +69,15 @@
 		          </div>
 				  
 				  <div>
-				  	            <span class="details">Select Role</span>
-							   	 <input  type="checkbox" id="role1" class="role" name="role_name" value="USER" >USER
-							   	 <input  type="checkbox" id="role2" class="role" name="role_name" value="ADMIN" >ADMIN
-							   
-							   
-				  	          </div>
+				  							<span class="details">Select Role</span>
+				  							<div style="display:flex;flex-wrap:wrap;">
+				  								<p th:each="role: ${roles}">
+				  									<input type="checkbox" th:id="${role}" class="role" name="role_name"
+				  										th:value="${role}">
+				  									<span class="gender" th:text="${role}"></span>
+				  								</p>
+				  							</div>
+				  						</div>
 				  
 		        </div>
 		        <div class="gender-details">
@@ -111,24 +114,27 @@
 	<script th:inline="javascript">
 	/*<![CDATA[*/
 	     	var roleList= /*[[${roles}]]*/ "Test1";
+			var selectedRoles =/*[[${roles}]]*/ "Test2";
 	/*]]>*/
 	</script>
 	<script>
-	 $(document).ready(function (){
-		if(roleList!=null){
-		roleList.forEach((element) => {
-			if(element=="USER"){
-				$("#role1").attr("checked", "checked");
-			}
-			else if(element=="ADMIN"){
-				$("#role2").attr("checked", "checked");
-			}
-		});
-	}	
-		if(roleList==null){
-			$("#role1").attr("checked", "checked");
-		}
-	 });
+		$(document).ready(function () {
+				if (selectedRoles != null) {
+					selectedRoles.forEach((element) => {
+						roleList.forEach((element1) => {
+
+							if (element == element1)
+								$("#" + element1).attr("checked", "checked");
+
+
+						});
+
+					});
+				}
+				if (selectedRoles == null) {
+					$("#USER").attr("checked", "checked");
+				}
+			});
 	  function passwordVerfiy(e){
 		  if($("#password") !=""){
 		  if($("#password").val() !==e)

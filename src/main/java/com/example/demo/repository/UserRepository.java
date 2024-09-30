@@ -7,7 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import com.example.demo.entity.Users;
 
+import jakarta.transaction.Transactional;
+
 @Repository
+@Transactional
 public interface UserRepository extends JpaRepository<Users,UUID>{  
 	@Query("SELECT u FROM Users u WHERE u.username = :username")
 	Users findByUserName(String username);
@@ -17,5 +20,9 @@ public interface UserRepository extends JpaRepository<Users,UUID>{
     
 	@Query("SELECT u FROM Users u WHERE u.username = :username")
 	List<Users> findByMutipleUser(String username);
+
+	Users findByEmail(String email);
+	
+	
 
 }

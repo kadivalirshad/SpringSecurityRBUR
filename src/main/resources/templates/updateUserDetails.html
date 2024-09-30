@@ -29,13 +29,13 @@
 		<div class="container">
 			<div class="title">Registration</div>
 			<div th:if="${param.success}">
-				<div class="alert alert-info" style="color:green;">You've successfully registered!</div>
+				<div class="alert alert-info" style="color:green;">You've successfully Updated!</div>
 			</div>
 			<div th:if="${param.error}">
 				<div class="alert alert-info" style="color:red;">Oops! Something Went Wrong</div>
 			</div>
 			<div class="content">
-				<form id="userForm" name="userForm" method="post" th:action="@{/user/register/save}" role="form"
+				<form id="userForm" name="userForm" method="post" th:action="@{/user/register/update}" role="form"
 					th:object="${user}">
 					<div id="rolesData" data-roles-th="${user.roles}" hidden></div>
 					<input type="hidden" th:if="${user.user_id !=null}" th:value="${user.user_id}" name="user_id">
@@ -86,7 +86,6 @@
 										th:value="${role}" onclick="hideError(RoleValidateId)">
 									<span class="gender" th:text="${role}"></span>
 								</p>
-								
 							</div>
 							<span id="RoleValidateId" style="color:red;display:none;">At Least One Role Is Must</span>
 							<p th:errors="*{mobile}" class="text-danger" th:if="${#fields.hasErrors('role_name')}">
@@ -127,9 +126,6 @@
 </body>
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
 	crossorigin="anonymous"></script>
-	
-		  
-			 <script src="/js/commonAjax.js" th:src="@{/js/commonAjax.js}"></script>
 <script th:inline="javascript">
 	/*<![CDATA[*/
 	var roleList = /*[[${allrole}]]*/ "Test1";
@@ -208,17 +204,17 @@
 				}
 			}
 			if (data[i].type === 'checkbox' && rolecount == 0) {
-							if (!data[i].checked) {
-								$("#" + data[i].id).css("border", "1px solid red");
-								rolvalueValidate = false;
-								$("#RoleValidateId").show();
-							}
-							else {
-								rolecount++;
-								rolvalueValidate = true;
-								$("#RoleValidateId").hide();
-							}
-						}
+										if (!data[i].checked) {
+											$("#" + data[i].id).css("border", "1px solid red");
+											rolvalueValidate = false;
+											$("#RoleValidateId").show();
+										}
+										else {
+											rolecount++;
+											rolvalueValidate = true;
+											$("#RoleValidateId").hide();
+										}
+									}
 			if (data[i].type === 'text' || data[i].type === 'password' || data[i].type === 'email') {
 				if (valueById == null || valueById === "") {
 					$("#" + data[i].id).css("border", "1px solid red");

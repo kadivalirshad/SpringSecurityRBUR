@@ -46,7 +46,9 @@ public class Users {
 	private String mobile;
 	@Column(name = "GENDER", nullable = false)
 	private String gender;
-	@ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+	@Column(name="PROVIDER")
+	private String provider;
+	@ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private List<Role> roles = new ArrayList<>();
 	@Column(name = "PLAIN_PASS")

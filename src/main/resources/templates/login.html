@@ -190,7 +190,7 @@
 	<div class="screen">
 		<div class="screen__content">
 			
-			<form method="post" th:action="@{/user/login}" class="login" role="form"  th:object="${login}">
+			<form method="post" th:action="@{/user/checkUserLogin}" class="login" role="form"  th:object="${login}">
 				<div th:if="${param.error}" style="color:red;font-weight:bold;">Invalid username or password </div>
 				<div class="login__field">
 					<i class="login__icon fas fa-user"></i>
@@ -208,9 +208,9 @@
 			<div class="social-login">
 				<h3>log in via</h3>
 				<div class="social-icons">
-					<a href="#" class="social-login__icon fab fa-instagram"></a>
-					<a href="#" class="social-login__icon fab fa-facebook"></a>
-					<a href="#" class="social-login__icon fab fa-twitter"></a>
+					<a th:href="@{/oauth2/authorization/google}" class="social-login__icon fab fa-google"></a>
+					<!--<a th:href="@{/oauth2/authorization/linkedin}" class="social-login__icon fab fa-linkedin"></a>-->
+					<a th:href="@{/oauth2/authorization/github}" class="social-login__icon fab fa-github"></a>
 				</div>
 			</div>
 		</div>

@@ -37,7 +37,9 @@ public class UserDto {
 	private String mobile;
 	@NotEmpty(message = "Gender Should Not Be Empty")
 	private String gender;
+	private String provider;
 	private List<Role> roles = new ArrayList<>();
+	@NotEmpty(message = "At Least One Role Is Must")
 	private String role_name[];
 	private String plain_pass;
 }
