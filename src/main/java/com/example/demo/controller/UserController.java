@@ -95,6 +95,16 @@ public class UserController {
 		return "redirect:/user/index";
     }
 	
+	@GetMapping("/loginWithLinkedin")
+	public String loginWithLinkedin(@AuthenticationPrincipal OAuth2User principal) {
+        LoginDto loginDto=new LoginDto();
+        loginDto.setUsername(principal.getAttribute("email"));
+        loginDto.setPassword("AUTH_PASS");
+        String token = userService.login(loginDto);
+		JwtAuthResponse jwtAuthResponse = new JwtAuthResponse();
+		jwtAuthResponse.setAccessToken(token);
+        return "redirect:/user/index";
+    }
 	
 	@GetMapping("/index")
 	public String index() {

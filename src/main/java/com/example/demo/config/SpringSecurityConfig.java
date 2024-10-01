@@ -13,6 +13,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -37,6 +40,9 @@ public class SpringSecurityConfig {
 	@Autowired
 	private GlobalExceptionHandler globalException;
 	
+	 @Autowired
+	  private ClientRegistrationRepository clientRegistrationRepository;
+	
 	@Bean
 	public static PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -56,6 +62,9 @@ public class SpringSecurityConfig {
 				.oauth2Login(oauth2 -> {
 					oauth2.loginPage("/user/login");
 					oauth2.successHandler(authSuccessHandler);
+					oauth2.authorizationEndpoint((authorizationEndpointConfig ->
+                    authorizationEndpointConfig.authorizationRequestResolver(
+                            requestResolver(this.clientRegistrationRepository))));
 					oauth2.failureHandler(globalException);
 				})
 				
@@ -82,5 +91,22 @@ public class SpringSecurityConfig {
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 	}
+	
+	private static DefaultOAuth2AuthorizationRequestResolver requestResolver
+    (ClientRegistrationRepository clientRegistrationRepository) {
+      DefaultOAuth2AuthorizationRequestResolver requestResolver =
+        new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository,
+                "/oauth2/authorization");
+         requestResolver.setAuthorizationRequestCustomizer(c ->
+        c.attributes(stringObjectMap -> stringObjectMap.remove(OidcParameterNames.NONCE))
+                .parameters(params -> params.remove(OidcParameterNames.NONCE))
+       );
+      return requestResolver;
+    }
+	
+	
+	
+	
+	
 	
 }

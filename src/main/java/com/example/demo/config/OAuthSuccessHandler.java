@@ -57,6 +57,10 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 			name = userAuth.getAttribute("name");
 
 		}
+		else if (authorizationId.equalsIgnoreCase("linkedin")) {
+			email = userAuth.getAttribute("email");
+			name = userAuth.getAttribute("name");
+		}
 
 		Users user = userRepository.findByUserName(email);
 		// Save LOgin Data
@@ -80,6 +84,8 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 			response.sendRedirect("/user/loginWithGoogle");
 		else if (authorizationId.equalsIgnoreCase("github"))
 			response.sendRedirect("/user/loginWithGitHub");
+		else if (authorizationId.equalsIgnoreCase("linkedin"))
+			response.sendRedirect("/user/loginWithLinkedin");
 	}
 
 }
